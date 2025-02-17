@@ -17,7 +17,7 @@ def load_checkpoint(checkpoint_file, model):
     err_str = "Checkpoint '{}' not found"
     assert os.path.exists(checkpoint_file), err_str.format(checkpoint_file)
     # Load the checkpoint on CPU to avoid GPU mem spike
-    checkpoint = torch.load(checkpoint_file, map_location="cpu")
+    checkpoint = torch.load(checkpoint_file, map_location="cpu", weights_only=True)
     try:
         state_dict = checkpoint["model_state"]
     except KeyError:

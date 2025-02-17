@@ -23,34 +23,38 @@ _SD = [0.225, 0.224, 0.229]
 class DataSet(torch.utils.data.Dataset):
     """Common dataset."""
 
-    def __init__(self, data_path, dataset, fn, split, scale_list):
+    def __init__(self, data_path, dataset, split, scale_list):
         assert os.path.exists(
             data_path), "Data path '{}' not found".format(data_path)
-        self._data_path, self._dataset, self._fn, self._split, self._scale_list = data_path, dataset, fn, split, scale_list
+        self._data_path, self._dataset, self._split, self._scale_list = data_path, dataset, split, scale_list
+        self._fn = f'gnd_{self._dataset}.pkl'
         self._construct_db()
 
+    def get_data_paths(self):
+        return [x["im_path"] for x in self._db]
+        
     def _construct_db(self):
         """Constructs the db."""
         # Compile the split data path
         self._db = []
-        if self._dataset in ['oxford5k', 'roxford5k', 'paris6k', 'rparis6k']:
-            with open(os.path.join(self._data_path, self._dataset, self._fn), 'rb') as fin:
-                gnd = pkl.load(fin)
-                if self._split == "query":
-                    for i in range(len(gnd["qimlist"])):
-                        im_fn = gnd["qimlist"][i]
-                        im_path = os.path.join(
-                            self._data_path, self._dataset, "jpg", im_fn+".jpg")
-                        self._db.append(
-                            {"im_path": im_path, "bbox": gnd["gnd"][i]["bbx"]})
-                elif self._split == "db":
-                    for i in range(len(gnd["imlist"])):
-                        im_fn = gnd["imlist"][i]
-                        im_path = os.path.join(
-                            self._data_path, self._dataset, "jpg", im_fn+".jpg")
-                        self._db.append({"im_path": im_path})
-        else:
-            assert() # Unsupported dataset
+        # if self._dataset in ['oxford5k', 'roxford5k', 'paris6k', 'rparis6k']:
+        with open(os.path.join(self._data_path, self._dataset, self._fn), 'rb') as fin:
+            gnd = pkl.load(fin)
+            if self._split == "query":
+                for i in range(len(gnd["qimlist"])):
+                    im_fn = gnd["qimlist"][i]
+                    im_path = os.path.join(
+                        self._data_path, self._dataset, "jpg", im_fn+".jpg")
+                    self._db.append(
+                        {"im_path": im_path, "bbox": gnd["gnd"][i]["bbx"]})
+            elif self._split == "db":
+                for i in range(len(gnd["imlist"])):
+                    im_fn = gnd["imlist"][i]
+                    im_path = os.path.join(
+                        self._data_path, self._dataset, "jpg", im_fn+".jpg")
+                    self._db.append({"im_path": im_path})
+        # else:
+        #     assert() # Unsupported dataset
 
     def _prepare_im(self, im):
         """Prepares the image for network input."""
@@ -60,6 +64,12 @@ class DataSet(torch.utils.data.Dataset):
         # Color normalization
         im = transforms.color_norm(im, _MEAN, _SD)
         return im
+    
+    def get_im_paths(self, idxs):
+        res = []
+        for i, idx_row in enumerate(idxs):
+            res.append([self._db[idx]["im_path"] for idx in idx_row])
+        return res
 
     def __getitem__(self, index):
         # Load the image

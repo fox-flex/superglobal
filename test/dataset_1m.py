@@ -9,6 +9,7 @@
 
 import os
 import re
+import glob
 
 import cv2
 import numpy as np
@@ -37,7 +38,10 @@ class DataSet(torch.utils.data.Dataset):
     def _construct_db(self):
         """Constructs the db."""
         # Compile the split data path
-        self.data_path = read_imlist(os.path.join(self.data_path_base, "revisitop1m.txt"))
+        files = glob.glob(f"{self.data_path_base}/*.txt")
+        assert len(files) == 1
+        file_path = files[0]
+        self.data_path = read_imlist(file_path)
         self.n = len(self.data_path)
         
 

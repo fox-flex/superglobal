@@ -15,10 +15,10 @@ from test.dataset import DataSet
 
 # Default data directory (/path/pycls/pycls/datasets/data)
 
-def _construct_loader(_DATA_DIR, dataset_name, fn, split, scale_list, batch_size, shuffle, drop_last):
+def _construct_loader(_DATA_DIR, dataset_name, split, scale_list, batch_size, shuffle, drop_last):
     """Constructs the data loader for the given dataset."""
     # Construct the dataset
-    dataset = DataSet(_DATA_DIR, dataset_name, fn, split, scale_list)
+    dataset = DataSet(_DATA_DIR, dataset_name, split, scale_list)
     # Create a loader
     loader = torch.utils.data.DataLoader(
         dataset,
@@ -31,12 +31,11 @@ def _construct_loader(_DATA_DIR, dataset_name, fn, split, scale_list, batch_size
     )
     return loader
 
-def construct_loader(_DATA_DIR, dataset_name, fn, split, scale_list):
+def construct_loader(_DATA_DIR, dataset_name, split, scale_list):
     """Test loader wrapper."""
     return _construct_loader(
         _DATA_DIR=_DATA_DIR,
         dataset_name=dataset_name,
-        fn=fn,
         split=split,
         scale_list = scale_list,
         batch_size=1,

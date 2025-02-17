@@ -44,20 +44,26 @@ def main():
                         help='Path to weight')
     parser.add_argument('--depth', default=101, type=int,
                         help='Depth of ResNet')
+    parser.add_argument('--data-path',
+                        default="/data1/shaoshihao/rop1m/RevistedOP",
+                        type=str,
+                        help='Depth of ResNet')
+    
     args = parser.parse_args()
     weight_path, depth =  args.weight,  args.depth
+    data_path = args.data_path
     model1 = CVNet_Rerank(depth, 2048, True)
         
     weight = torch.load(weight_path)
     weight_new = {}
-    for i,j in zip(weight['model_state'].keys(), weight['model_state'].values()):
-            weight_new[i.replace('globalmodel','encoder_q')] = j
-            
+    for i, j in zip(weight['model_state'].keys(), weight['model_state'].values()):
+        weight_new[i.replace('globalmodel','encoder_q')] = j
+
     mis_key = model1.load_state_dict(weight_new, strict=False)
     
     model1.cuda()
     
-    dataset = DataSet("/data1/shaoshihao/rop1m/RevistedOP")
+    dataset = DataSet(data_path)
     dataloader = torch.utils.data.DataLoader(
         dataset,
         batch_size=1,

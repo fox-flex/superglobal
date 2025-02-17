@@ -21,7 +21,6 @@ _C = CfgNode()
 #   from core.config import cfg
 cfg = _C
 
-
 _C.MODEL_NAME = ""
 # ------------------------------------------------------------------------------------ #
 # Model options
@@ -33,6 +32,7 @@ _C.MODEL.TYPE = "RESNET"
 
 # Number of weight layers
 _C.MODEL.DEPTH = 50
+_C.IMGS_PER_QUERY = 5
 
 # Loss function (see pycls/models/loss.py for options)
 _C.MODEL.LOSSES = CfgNode()

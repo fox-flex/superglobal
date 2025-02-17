@@ -7,15 +7,36 @@ import numpy as np
 import test.test_loader as loader
 from test.evaluate import compute_map
 
+
+def rescale_tensor(tensor, min_size=300, max_size=2000):
+    _, _, n, m = tensor.shape
+    min_dim = min(n, m)
+    max_dim = max(n, m)
+
+    if min_dim < min_size:
+        scale_factor = min_size / min_dim
+        new_size = (int(n * scale_factor), int(m * scale_factor))
+        rescaled_tensor = F.interpolate(tensor, size=new_size, mode='bilinear', align_corners=False)
+        return rescaled_tensor
+    if max_dim > max_size:
+        scale_factor = max_size / max_dim
+        new_size = (int(n * scale_factor), int(m * scale_factor))
+        rescaled_tensor = F.interpolate(tensor, size=new_size, mode='area')
+        return rescaled_tensor
+    else:
+        return tensor
+
 @torch.no_grad()
-def extract_feature(model, data_dir, dataset, gnd_fn, split, scale_list_fix, gemp, rgem, sgem, scale_list):
+def extract_feature(model, data_dir, dataset, split, scale_list_fix, gemp, rgem, sgem, scale_list):
     with torch.no_grad():
-        test_loader = loader.construct_loader(data_dir, dataset, gnd_fn, split, scale_list_fix)
+        test_loader = loader.construct_loader(data_dir, dataset, split, scale_list_fix)
         img_feats = [[] for _ in range(len(scale_list_fix))] 
         
         for im_list in tqdm(test_loader):
             for idx in range(len(im_list)):
+                im_list[idx] = rescale_tensor(im_list[idx])
                 im_list[idx] = im_list[idx].cuda()
+                
                 
                 desc = model.extract_global_descriptor(im_list[idx], gemp, rgem, sgem, scale_list)
 

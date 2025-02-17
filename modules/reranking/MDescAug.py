@@ -15,14 +15,8 @@ class MDescAug(nn.Module):
         self.K = K + 1 # including oneself
         self.beta = beta
     def forward(self, X, Q, ranks):
-
-        #ranks = torch.argsort(-sim, axis=0) # 6322 70
-        
-        
         ranks_trans_1000 = torch.transpose(ranks,1,0)[:,:self.M] # 70 400 
-        
-        
-        X_tensor1 = torch.tensor(X[ranks_trans_1000]).cuda()
+        X_tensor1 = X[ranks_trans_1000].clone().cuda()
         
         res_ie = torch.einsum('abc,adc->abd',
                 X_tensor1,X_tensor1) # 70 400 400
